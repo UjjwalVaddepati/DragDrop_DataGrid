@@ -23,7 +23,7 @@
 
                 <Style x:Key="GridCellStyle" TargetType="DataGridCell">
                     <Setter Property="FontFamily" Value="Verdana"></Setter>
-                    <!--<EventSetter Event="Drop" Handler="EventSetter_OnHandler"></EventSetter>-->
+                    <EventSetter Event="Drop" Handler="EventSetter_OnHandler"></EventSetter>
                     <Setter Property="Background" Value="White"></Setter>
                     <Setter Property="Foreground" Value="Black"></Setter>
                     <Setter Property="BorderThickness" Value="0"></Setter>
@@ -31,7 +31,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="#72BDD6"></Setter>                            
                         </Trigger>
-                        <EventTrigger RoutedEvent="Drop">
+                        <!--<EventTrigger RoutedEvent="Drop">
                             <BeginStoryboard>
                                 <Storyboard>
                                     <BooleanAnimationUsingKeyFrames Storyboard.TargetProperty="dragdrop:DragDropHelper.HighlightColumn">
@@ -39,7 +39,7 @@
                                     </BooleanAnimationUsingKeyFrames>
                                 </Storyboard>
                             </BeginStoryboard>
-                        </EventTrigger>
+                        </EventTrigger>-->
                     </Style.Triggers>
                 </Style>
 

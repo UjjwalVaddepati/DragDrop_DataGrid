@@ -118,7 +118,7 @@ namespace BindableColumn
 
         private void EventSetter_OnHandler(object sender, DragEventArgs e)
         {            
-            //DragDrop.DragDropHelper.SetHighlightColumn(sender as DependencyObject, true);
+            DragDrop.DragDropHelper.SetHighlightColumn(sender as DependencyObject, true);
         }
 
         private void myGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
