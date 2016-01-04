@@ -108,8 +108,7 @@
                       dragdrop:DragDropHelper.IsDragSource="True"
                       dragdrop:DragDropHelper.IsDropTarget="True"
                       Drop="myGrid_Drop"                      
-                      AllowDrop="True"       
-                      
+                      AllowDrop="True"                             
                       MouseDoubleClick="myGrid_MouseDoubleClick"
                       RowHeaderTemplate="{StaticResource rowHeaderTemplate}" 
                       ColumnHeaderStyle="{StaticResource GridHeaderStyle}"

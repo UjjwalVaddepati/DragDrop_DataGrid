@@ -86,13 +86,13 @@ namespace BindableColumn.DragDrop
 
             if (cell != null && GetHighlightColumn(sender))
             {
-                Instance.Cell_Drop(sender, null);
+                Instance.DataGrid_CellDrop(sender, null);
 
                 SetHighlightColumn(sender, false);
             }
         }
 
-        private void Cell_Drop(object sender, DragEventArgs e)
+        private void DataGrid_CellDrop(object sender, DragEventArgs e)
         {
             DataGridCell dgc = sender as DataGridCell;
 
