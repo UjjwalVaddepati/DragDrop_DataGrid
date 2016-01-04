@@ -90,18 +90,19 @@ namespace BindableColumn.ViewModel
             // Columns
 
             #region Columns
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "1" }));
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "2" }));
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "3" }));
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "4" }));
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "5" }));
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "6" }));
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "7" }));
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "8" }));
-            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "9" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "01" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "02" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "03" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "04" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "05" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "06" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "07" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "08" }));
+            this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "09" }));
             this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "10" }));
             this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "11" }));
             this.ColumnsCollection.Add(new ColumnsViewModel(new Column() { Currency = "12" }));
+            
             #endregion
 
             #region Rows
@@ -124,14 +125,14 @@ namespace BindableColumn.ViewModel
             RowColumnValues.Add(new MappedValue
             {
                 Value = new CellData() { ColorName = "Data 8", IsCellHit = true },
-                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("2")).FirstOrDefault(),
+                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("02")).FirstOrDefault(),
                 RowBinding = RowCollection.Where(x => x.Name.Equals("B")).FirstOrDefault()
             });
 
             RowColumnValues.Add(new MappedValue
             {
                 Value = new CellData() { ColorName = "Data 1" },
-                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("5")).FirstOrDefault(),
+                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("05")).FirstOrDefault(),
                 RowBinding = RowCollection.Where(x => x.Name.Equals("C")).FirstOrDefault()
             });
 
@@ -139,42 +140,42 @@ namespace BindableColumn.ViewModel
             RowColumnValues.Add(new MappedValue
             {
                 Value = new CellData() { ColorName = "Data 2" },
-                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("6")).FirstOrDefault(),
+                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("06")).FirstOrDefault(),
                 RowBinding = RowCollection.Where(x => x.Name.Equals("D")).FirstOrDefault()
             });
 
             RowColumnValues.Add(new MappedValue
             {
                 Value = new CellData() { ColorName = "Data 3" },
-                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("8")).FirstOrDefault(),
+                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("08")).FirstOrDefault(),
                 RowBinding = RowCollection.Where(x => x.Name.Equals("E")).FirstOrDefault()
             });
 
             RowColumnValues.Add(new MappedValue
             {
                 Value = new CellData() { ColorName = "Data 4" },
-                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("8")).FirstOrDefault(),
+                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("08")).FirstOrDefault(),
                 RowBinding = RowCollection.Where(x => x.Name.Equals("C")).FirstOrDefault()
             });
 
             RowColumnValues.Add(new MappedValue
             {
                 Value = new CellData() { ColorName = "Data 5" },
-                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("8")).FirstOrDefault(),
+                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("08")).FirstOrDefault(),
                 RowBinding = RowCollection.Where(x => x.Name.Equals("H")).FirstOrDefault()
             });
 
             RowColumnValues.Add(new MappedValue
             {
                 Value = new CellData() { ColorName = "Data 6" },
-                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("8")).FirstOrDefault(),
+                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("08")).FirstOrDefault(),
                 RowBinding = RowCollection.Where(x => x.Name.Equals("F")).FirstOrDefault()
             });
 
             RowColumnValues.Add(new MappedValue
             {
                 Value = new CellData() { ColorName = "Data 7" },
-                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("8")).FirstOrDefault(),
+                ColumnBinding = ColumnsCollection.Where(x => x.Currency.Equals("08")).FirstOrDefault(),
                 RowBinding = RowCollection.Where(x => x.Name.Equals("A")).FirstOrDefault()
             });
 

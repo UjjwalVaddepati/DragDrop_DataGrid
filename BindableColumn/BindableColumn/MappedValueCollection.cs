@@ -52,7 +52,7 @@ namespace BindableColumn
         {
             MappedValue value = this.Where(x => x.RowBinding == RowBinding && x.ColumnBinding == ColumnBinding).Single();
             if (value != null)
-                value.Value = new CellData();                                        
+                value.Value = null;                                        
         }
 
         public bool AddCellValue(object RowBinding, object ColumnBinding, object cellData)

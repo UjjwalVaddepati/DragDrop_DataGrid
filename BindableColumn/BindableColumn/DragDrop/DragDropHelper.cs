@@ -2,8 +2,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -21,9 +25,11 @@ namespace BindableColumn.DragDrop
         private string targetCell = string.Empty;
         private string sourceCell = string.Empty;
         List<string> cellsHovered = new List<string>();
+        private bool _isMultipleCells = false;
         private Point _initialMousePosition;
         private Vector _initialMouseOffset;
         private object _draggedData;
+        private Dictionary<string, object> _multipleDraggedData = new Dictionary<string, object>();
         private DraggedAdorner _draggedAdorner;
         private InsertionAdorner _insertionAdorner;
         private Window _topWindow;
@@ -90,46 +96,194 @@ namespace BindableColumn.DragDrop
         {
             DataGridCell dgc = sender as DataGridCell;
 
-            if (_draggedData != null)
+            if (_draggedData != null && !_isMultipleCells)
             {
                 MappedValue selectedCell = _draggedData as MappedValue;
 
                 RowViewModel sourceRowModel = (selectedCell.RowBinding as RowViewModel);
                 ColumnsViewModel sourceColumnModel = (selectedCell.ColumnBinding as ColumnsViewModel);
 
+
                 RowViewModel targetRowModel = ((BindableColumn.ViewModel.RowViewModel)(dgc.DataContext));
                 ColumnsViewModel targetColumnModel = ((BindableColumn.ViewModel.ColumnsViewModel)((dgc.Column).Header));
 
-                sourceCell = sourceRowModel.Name + sourceColumnModel.Currency;
                 targetCell = targetRowModel.Name + targetColumnModel.Currency;
+                sourceCell = sourceRowModel.Name + sourceColumnModel.Currency;
+
 
                 if (sourceCell == targetCell)
                 {
                     RemoveDraggedAdorner();
                     RemoveInsertionAdorner();
+                    (this._sourceItemsControl as DataGrid).UnselectAllCells();
+                    dgc.IsSelected = false;
                     return;
                 }
 
                 MappedValueCollection mappedValueCollection = this._mappedValueCollection;
                 var movingCellData = mappedValueCollection.ReturnIfExistAddIfNot(sourceColumnModel, sourceRowModel);
-             
+
                 if (mappedValueCollection.AddCellValue(targetRowModel, targetColumnModel, movingCellData))
                 {
                     if (movingCellData.Value != null)
                         dgc.IsSelected = true;
 
-                    mappedValueCollection.EmptyCellValue(sourceRowModel, sourceColumnModel);                  
+                    mappedValueCollection.EmptyCellValue(sourceRowModel, sourceColumnModel);
                 }
+            }
+            else if (_draggedData != null && _isMultipleCells)
+            {
+                RowViewModel targetRowModel = ((BindableColumn.ViewModel.RowViewModel)(dgc.DataContext));
+                ColumnsViewModel targetColumnModel = ((BindableColumn.ViewModel.ColumnsViewModel)((dgc.Column).Header));
+
+                targetCell = targetRowModel.Name + targetColumnModel.Currency;
+
+                if (MoveMultipleCells(targetCell, this._multipleDraggedData.Count))                
+                    this._multipleDraggedData.Clear();                    
+                
             }
 
             RemoveDraggedAdorner();
             RemoveInsertionAdorner();
+            this._multipleDraggedData.Clear();
+            (this._sourceItemsControl as DataGrid).UnselectAllCells();
         }
 
-        private void ExchangeData(string sourceCell, string targetCell, object p)
+        private bool MoveMultipleCells(string targetCell, int countOfCells)
         {
+            Dictionary<string, object> availableCells = getNextAvailableCells(targetCell, countOfCells);
+
+            if (availableCells.Count == 0)
+                MessageBox.Show("No Available Cells, please drop the cells in the available space");
+            else if (availableCells.Count < _multipleDraggedData.Count &&
+                MessageBox.Show("Only Some cells will be moved are you ok ?? ", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                return ExchangeData(availableCells);
+            else if (availableCells.Count.Equals(_multipleDraggedData.Count))
+                return ExchangeData(availableCells);
+
+            return false;
+        }
+
+        private bool ExchangeData(Dictionary<string, object> availableCells)
+        {
+            if (availableCells.Count > 1)
+            {
+                foreach (KeyValuePair<string, object> movingCellData in availableCells)
+                {
+                    MappedValueCollection mappedValueCollection = this._mappedValueCollection;
+                    var CellData = mappedValueCollection.ReturnIfExistAddIfNot((movingCellData.Value as MappedValue).ColumnBinding, (movingCellData.Value as MappedValue).RowBinding);
+                    var bindingData = GetDataForBinding();
+
+                    if (bindingData != null)
+                    {
+                        CellData.Value = (bindingData as MappedValue).Value;
+                        MappedValue value = this._mappedValueCollection.ReturnIfExistAddIfNot((bindingData as MappedValue).ColumnBinding, (bindingData as MappedValue).RowBinding);
+                        value.Value = null;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private object GetDataForBinding()
+        {
+            if (_multipleDraggedData.Count >= 1)
+            {
+                var key = this._multipleDraggedData.First();
+                MappedValue dataToSend = this._multipleDraggedData[key.Key] as MappedValue;
+                _multipleDraggedData.Remove(key.Key);
+                
+                return dataToSend;
+            }
+
+            return null;
+        }
+
+        private Dictionary<string, object> getNextAvailableCells(string targetCell, int countOfCells)
+        {
+            string rowPosition;
+            string columnPosition;
+
+            Dictionary<string, object> _availableCells = new Dictionary<string, object>();
+
+            char[] arrayofAlphabets = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P' };
+            string[] arrayofNumbers = new string[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
+
+            bool isRowAlphabet = !String.IsNullOrEmpty(targetCell) && Char.IsLetter(targetCell.ToCharArray()[0]);
+            GetPlate_RowColumnPosition(isRowAlphabet, targetCell, out rowPosition, out columnPosition);
+
+
+            int rowCount = isRowAlphabet ? Array.IndexOf(arrayofAlphabets, Convert.ToChar(rowPosition)) : Convert.ToInt32(rowPosition);
+            int columnCount = !isRowAlphabet ? Array.IndexOf(arrayofNumbers, Convert.ToChar(columnPosition)) : Convert.ToInt32(columnPosition);
+
+            ObservableCollection<RowViewModel> RowCollection = (this._sourceDataContext as MainWindowViewModel).RowCollection;
+            ObservableCollection<ColumnsViewModel> ColumnsCollection = (this._sourceDataContext as MainWindowViewModel).ColumnsCollection;
+            MappedValueCollection RowColumnValues = (this._sourceDataContext as MainWindowViewModel).RowColumnValues;
+
+
+            for (int currentRow = rowCount; currentRow < RowCollection.Count; currentRow++)
+            {
+                string row = isRowAlphabet ? Convert.ToString(arrayofAlphabets[currentRow]) : string.Format("{0:D2}", currentRow);
+                var tempRowBinding = RowCollection.Where(q => q.Name.Equals(row)).FirstOrDefault();
+
+                for (int currentColumn = columnCount; currentColumn < ColumnsCollection.Count; currentColumn++)
+                {
+                    if (countOfCells == _availableCells.Count)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        string column = !isRowAlphabet ? Convert.ToString(arrayofAlphabets[currentColumn]) : string.Format("{0:D2}", currentColumn);
+                        var tempColumnBinding = ColumnsCollection.Where(p => p.Currency.Equals(column)).FirstOrDefault();
+                        string currentCell = row + column;
+                        MappedValue tempRowColumn = RowColumnValues.Where(Z => Z.RowBinding == tempRowBinding && Z.ColumnBinding == tempColumnBinding).FirstOrDefault();
+
+                        if (tempRowColumn.Value == null || (tempRowColumn.Value != null && (tempRowColumn.Value as CellData).ColorName == null))
+                            _availableCells.Add(currentCell, tempRowColumn);
+                    }
+                }
+
+                if (countOfCells == _availableCells.Count)
+                {
+                    break;
+                }
+            }
+
+
+            return _availableCells;
+        }
+
+        private static void GetPlate_RowColumnPosition(bool isRowAlphabet, string t, out string rowPosition, out string columnPosition)
+        {
+            if (string.IsNullOrWhiteSpace(t))
+            {
+                rowPosition = null;
+                columnPosition = null;
+                return;
+            }
+
+            Regex re;
+            Match result;
+            StringBuilder number = new StringBuilder();
+
+            if (isRowAlphabet)
+            {
+                re = new Regex(@"([a-zA-Z]+)(\d+)");
+                result = re.Match(t);
+            }
+            else
+            {
+                re = new Regex(@"(\d+)([a-zA-Z]+)");
+                result = re.Match(t);
+            }
+
+            rowPosition = isRowAlphabet ? result.Groups[1].Value : String.Format("{0:D2}", Convert.ToInt32(result.Groups[1].Value));
+            columnPosition = !isRowAlphabet ? result.Groups[2].Value : String.Format("{0:D2}", Convert.ToInt32(result.Groups[2].Value));
 
         }
+
         #endregion
 
         #region IsDropRejectFromOthers
@@ -164,23 +318,46 @@ namespace BindableColumn.DragDrop
 
         private static void IsDragSourceChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
-            var dragSource = obj as ItemsControl;
+            var dragSource = obj as DataGrid;
             if (dragSource != null)
             {
                 if (Equals(e.NewValue, true))
                 {
                     dragSource.PreviewMouseLeftButtonDown += Instance.DragSource_PreviewMouseLeftButtonDown;
                     dragSource.PreviewMouseLeftButtonUp += Instance.DragSource_PreviewMouseLeftButtonUp;
-                    dragSource.PreviewMouseMove += Instance.DragSource_PreviewMouseMove;                    
+                    dragSource.PreviewMouseMove += Instance.DragSource_PreviewMouseMove;
+                    dragSource.SelectedCellsChanged += Instance.DragSource_SelectedCellsChanged;
                 }
                 else
                 {
                     dragSource.PreviewMouseLeftButtonDown -= Instance.DragSource_PreviewMouseLeftButtonDown;
                     dragSource.PreviewMouseLeftButtonUp -= Instance.DragSource_PreviewMouseLeftButtonUp;
-                    dragSource.PreviewMouseMove -= Instance.DragSource_PreviewMouseMove;                    
+                    dragSource.PreviewMouseMove -= Instance.DragSource_PreviewMouseMove;
+                    dragSource.SelectedCellsChanged -= Instance.DragSource_SelectedCellsChanged;
                 }
             }
         }
+
+        private void DragSource_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            IList<DataGridCellInfo> selectedCells = (sender as DataGrid).SelectedCells;
+            this._multipleDraggedData.Clear();
+
+            selectedCells.ToList().ForEach(x =>
+            {
+                RowViewModel rowModel = x.Item as RowViewModel;
+                ColumnsViewModel columnModel = x.Column.Header as ColumnsViewModel;
+                MappedValue value = AttachedColumnBehavior.GetMappedValues(sender as DependencyObject).ReturnIfExistAddIfNot(columnModel, rowModel);
+
+                var selectedCell = rowModel.Name + columnModel.Currency;
+
+                if (value.Value != null && selectedCells.Count > 1 && !_multipleDraggedData.ContainsKey(selectedCell))
+                    this._multipleDraggedData.Add(selectedCell, value);
+            });
+
+            _isMultipleCells = selectedCells.Count > 1;
+        }
+
         #endregion
 
         #region IsCellDrop
@@ -279,8 +456,7 @@ namespace BindableColumn.DragDrop
             this._initialMousePosition = e.GetPosition(this._topWindow);
 
             this._sourceItemContainer = _sourceItemsControl.ContainerFromElement(visual) as FrameworkElement;
-            //this._sourceItemContainer = cell as FrameworkElement;            
-            
+
             _columnsModel = GetColumnModel(sender, e, out _sourceCell);
 
             if (_columnsModel == null)
@@ -290,12 +466,11 @@ namespace BindableColumn.DragDrop
             {
                 _rowModel = this._sourceItemContainer.DataContext;
                 this._draggedData = AttachedColumnBehavior.GetMappedValues(sender as DependencyObject).ReturnIfExistAddIfNot(_columnsModel, _rowModel);
-                _sourceCell.IsSelected = false;
             }
         }
 
         private object GetColumnModel(object sender, MouseButtonEventArgs e, out DataGridCell cell)
-        {            
+        {
             DependencyObject dep = (DependencyObject)e.OriginalSource;
             cell = new DataGridCell();
             // iteratively traverse the visual tree
@@ -337,7 +512,7 @@ namespace BindableColumn.DragDrop
 
                     var data = new DataObject(this._format.Name, this._draggedData);
 
-                    _sourceCell.IsSelected = false;
+                    _sourceCell.IsSelected = true;
 
                     // Adding events to the window to make sure dragged adorner comes up when mouse is not over a drop target.
                     bool previousAllowDrop = this._topWindow.AllowDrop;
@@ -361,6 +536,7 @@ namespace BindableColumn.DragDrop
                     this._topWindow.DragLeave -= TopWindow_DragLeave;
 
                     this._draggedData = null;
+                    //   this._multipleDraggedData.Clear();
                 }
             }
         }
@@ -368,6 +544,8 @@ namespace BindableColumn.DragDrop
         private void DragSource_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             this._draggedData = null;
+            //this._multipleDraggedData.Clear();
+            //this._multipleDraggedData = new List<object>();
         }
 
         #endregion
