@@ -151,7 +151,7 @@ namespace BindableColumn.DragDrop
 
         private bool MoveMultipleCells(string targetCell, int countOfCells)
         {
-            Dictionary<string, object> availableCells = getNextAvailableCells(targetCell, countOfCells);
+            Dictionary<string, object> availableCells = GetNextAvailableCells(targetCell, countOfCells);
 
             if (availableCells.Count == 0)
                 MessageBox.Show("No Available Cells, please drop the cells in the available space");
@@ -200,7 +200,7 @@ namespace BindableColumn.DragDrop
             return null;
         }
 
-        private Dictionary<string, object> getNextAvailableCells(string targetCell, int countOfCells)
+        private Dictionary<string, object> GetNextAvailableCells(string targetCell, int countOfCells)
         {
             string rowPosition;
             string columnPosition;

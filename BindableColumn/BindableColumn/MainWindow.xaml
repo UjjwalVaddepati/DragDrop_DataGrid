@@ -96,7 +96,7 @@
                     </Border>
                 </DataTemplate>
 
-
+ 
             </StackPanel.Resources>
             <DataGrid ItemsSource="{Binding RowCollection}" x:Name="myGrid"
                       loc:AttachedColumnBehavior.HeaderTemplate="{StaticResource headerTemplate}"                      
